@@ -5,3 +5,5 @@ gendiff:
 	node bin/gendiff.js
 lint: 
 	npx eslint --fix .
+start: 
+	npx webpack serve
