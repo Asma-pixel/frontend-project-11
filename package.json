@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "bootstrap": "^5.2.0",
+    "i18next": "^21.9.1",
     "npm-check-updates": "^16.0.6",
     "on-change": "^4.0.1",
     "sass": "^1.39.0",
