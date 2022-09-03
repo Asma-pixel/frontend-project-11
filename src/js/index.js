@@ -1,5 +1,4 @@
 // Import our custom CSS
-import '../styles/styles.scss'
+import app from './app.js';
 
-// Import all of Bootstrap's JS
-import * as bootstrap from 'bootstrap'
+app();
