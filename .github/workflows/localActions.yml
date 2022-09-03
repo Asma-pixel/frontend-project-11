@@ -29,5 +29,20 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-      - run: make install
-      - run: make lint
+      - name: npm install, build
+        # Install and build project
+          run: |
+            make install
+            make build
+      - name: Run linter
+          run: make lint
+      - name: "Deploy application"
+       run: |
+         prodRun=""
+         if [[ ${GITHUB_REF} == "refs/heads/main" ]]; then
+           prodRun="--development"
+         fi
+ 
+         npx vercel --token ${VERCEL_TOKEN} $prodRun
+       env:
+         VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}

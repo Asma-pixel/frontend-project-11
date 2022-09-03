@@ -10,6 +10,7 @@ const config = {
   entry: '/src/js/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
+    filename: 'index.js',
   },
   devServer: {
     open: true,

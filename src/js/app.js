@@ -3,8 +3,7 @@ import '../styles/styles.scss';
 // Import all of Bootstrap's JS
 
 import * as yup from 'yup';
-
-import onChange from 'on-change';
+import watcher from './view.js';
 
 const app = () => {
   const state = {
@@ -17,21 +16,8 @@ const app = () => {
     input: document.querySelector('input'),
     feedback: document.querySelector('.feedback'),
   };
-  const watcherErrors = onChange(state, (path, value) => {
-    if (value.length === 0) {
-      elements.input.classList.remove('is-invalid');
-      elements.input.value = '';
-      elements.input.focus();
-      elements.feedback.innerHTML = 'Rss успешно загружен';
-      elements.feedback.classList.add('text-success');
-      elements.feedback.classList.remove('text-danger');
-      return;
-    }
-    elements.input.classList.add('is-invalid');
-    elements.feedback.innerHTML = value;
-    elements.feedback.classList.remove('text-success');
-    elements.feedback.classList.add('text-danger');
-  });
+  const watch = watcher(state, elements);
+
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
     const linkShema = yup.object({
@@ -40,14 +26,13 @@ const app = () => {
 
     const formData = new FormData(elements.form);
     state.currentLink.website = formData.get('url');
-
     linkShema.validate(state.currentLink)
       .then((data) => {
         state.links.push(data.website);
-        watcherErrors.errors = [];
+        watch.errors = [];
       })
       .catch((err) => {
-        watcherErrors.errors = err.errors;
+        watch.errors = err.errors;
       });
   });
 };
