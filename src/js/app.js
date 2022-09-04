@@ -4,15 +4,13 @@ import '../styles/styles.scss';
 
 import * as yup from 'yup';
 import i18n from 'i18next';
+import axios from 'axios';
 import watcher from './view.js';
 import resources from '../resources/locales/index.js';
 
 const app = () => {
   const state = {
-    defaultLng: 'ru',
-    currentLink: {},
-    links: [],
-    errors: [],
+    defaultLng: 'ru', currentLink: {}, links: [], errors: [],
   };
   const elements = {
     form: document.querySelector('form'),
@@ -25,7 +23,8 @@ const app = () => {
     lng: state.defaultLng,
     debug: false,
     resources,
-  });
+  })
+    .then(() => { errorsWatcher = watcher(state, elements, i18nextInstance); });
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -37,13 +36,14 @@ const app = () => {
         linkShema = yup.object({
           website: yup.string().url(i18nextInstance.t('errors.linkNotValid')).notOneOf(state.links, i18nextInstance.t('errors.linkExist')).required(),
         });
-        errorsWatcher = watcher(state, elements, i18nextInstance);
       })
       .then(() => linkShema.validate(state.currentLink))
       .then((data) => {
         state.links.push(data.website);
         errorsWatcher.errors = [];
+        return axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(data.website)}`);
       })
+      .then((data) => console.log(data))
       .catch((err) => {
         errorsWatcher.errors = err.errors;
       });
