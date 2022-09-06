@@ -11,15 +11,14 @@ import domParser from './parsers/domParser';
 
 const request = (url, state, i18nextInstance) => {
   const err = {};
-  const request = axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(url)}`);
-  request.then((responce) => {
-    console.log(responce);
-    console.log(responce.data.contents);
+  const request = axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(url)}`)
+  .then((responce) => {
+    console.log('asdf')
     return domParser(responce.data.contents);
   })
-    .then(console.log);
 
-  return request;
+
+  return request
 };
 const app = () => {
   const state = {
@@ -55,6 +54,7 @@ const app = () => {
     let linkShema;
     const formData = new FormData(elements.form);
     state.currentLink.website = formData.get('url');
+    state.content.post.flat();
     initPromise
       .then(() => {
         linkShema = yup.object({
@@ -70,6 +70,9 @@ const app = () => {
         console.log(data);
         state.links.push(state.currentLink.website);
         state.errors = [];
+        state.content.feed.push(data.feed);
+        state.content.post.push(data.posts);
+        console.log(state);
         processWatcher.formState = i18nextInstance.t('formState.success');
       })
       .catch((err) => {

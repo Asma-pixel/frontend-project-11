@@ -6,5 +6,4 @@ export default (value, elements, i18nInstance) => {
   localElements.feedback.innerHTML = value;
   localElements.feedback.classList.remove('text-success');
   localElements.feedback.classList.add('text-danger');
-  console.log('afds')
 };

@@ -8,5 +8,4 @@ export default (elements, i18nInstance) => {
   localElements.feedback.innerHTML = i18nInstance.t('success.linkAdded');
   localElements.feedback.classList.add('text-success');
   localElements.feedback.classList.remove('text-danger');
-  console.log('asdf');
 };
