@@ -1,4 +1,4 @@
-export default (value, elements, i18nInstance) => {
+export default (value, elements) => {
   const localElements = elements;
   localElements.input.disabled = false;
   localElements.button.disabled = false;

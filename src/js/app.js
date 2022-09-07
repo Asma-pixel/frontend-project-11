@@ -7,18 +7,17 @@ import i18n from 'i18next';
 import axios from 'axios';
 import watcher from './view.js';
 import resources from '../resources/locales/index.js';
-import domParser from './parsers/domParser';
+import domParser from './parsers/domParser.js';
 
 const request = (url, state, i18nextInstance) => {
   const err = {};
   const request = axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(url)}`)
-  .then((responce) => {
-    console.log('asdf')
-    return domParser(responce.data.contents);
-  })
+    .then((responce) => {
+      console.log('asdf');
+      return domParser(responce.data.contents);
+    });
 
-
-  return request
+  return request;
 };
 const app = () => {
   const state = {
@@ -37,6 +36,8 @@ const app = () => {
     input: document.querySelector('input'),
     feedback: document.querySelector('.feedback'),
     button: document.querySelector('button'),
+    posts: document.querySelector('.posts'),
+    feeds: document.querySelector('.feeds'),
   };
   let processWatcher;
   const i18nextInstance = i18n.createInstance();
@@ -62,6 +63,7 @@ const app = () => {
         });
       })
       .then(() => linkShema.validate(state.currentLink))
+      .catch((err) => { throw new Error(err.errors); })
       .then((data) => {
         processWatcher.formState = i18nextInstance.t('formState.proccessing');
         return request(data.website, state, i18nextInstance);
@@ -76,7 +78,8 @@ const app = () => {
         processWatcher.formState = i18nextInstance.t('formState.success');
       })
       .catch((err) => {
-        state.errors = err.errors;
+        console.log(err);
+        state.errors = err.message;
         processWatcher.formState = i18nextInstance.t('formState.failed');
       })
       .finally(() => {
