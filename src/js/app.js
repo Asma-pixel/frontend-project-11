@@ -5,28 +5,33 @@ import '../styles/styles.scss';
 import * as yup from 'yup';
 import i18n from 'i18next';
 import axios from 'axios';
+import _ from 'lodash';
 import watcher from './view.js';
 import resources from '../resources/locales/index.js';
 import domParser from './parsers/domParser.js';
 
-const request = (url, state, i18nextInstance) => {
-  const err = {};
-  const request = axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(url)}`)
+const request = (url, state, i18nextInstance, processWatcher) => {
+  axios.get(`https://allorigins.hexlet.app/get?url=${encodeURIComponent(url)}`)
     .then((responce) => {
-      console.log('asdf');
-      return domParser(responce.data.contents);
+      const data = domParser(responce.data.contents, i18nextInstance, state.content.currentFeedId);
+      state.content.feed.push(data.feed);
+      state.content.post.push(data.posts);
+      console.log(state);
+      processWatcher.formState = '';
+      processWatcher.formState = i18nextInstance.t('formState.success');
     });
-
-  return request;
+  setTimeout(() => request(url, state, i18nextInstance, processWatcher), 5000);
 };
 const app = () => {
   const state = {
     defaultLng: 'ru',
     currentLink: {},
+
     formState: '',
     links: [],
     errors: [],
     content: {
+      currentFeedId: '',
       feed: [],
       post: [],
     },
@@ -36,8 +41,8 @@ const app = () => {
     input: document.querySelector('input'),
     feedback: document.querySelector('.feedback'),
     button: document.querySelector('button'),
-    posts: document.querySelector('.posts'),
     feeds: document.querySelector('.feeds'),
+    posts: document.querySelector('.posts'),
   };
   let processWatcher;
   const i18nextInstance = i18n.createInstance();
@@ -66,16 +71,14 @@ const app = () => {
       .catch((err) => { throw new Error(err.errors); })
       .then((data) => {
         processWatcher.formState = i18nextInstance.t('formState.proccessing');
-        return request(data.website, state, i18nextInstance);
+        state.content.currentFeedId = _.uniqueId();
+        console.log(state.content.currentFeedId);
+        request(data.website, state, i18nextInstance, processWatcher);
       })
-      .then((data) => {
-        console.log(data);
+      .then(() => {
         state.links.push(state.currentLink.website);
         state.errors = [];
-        state.content.feed.push(data.feed);
-        state.content.post.push(data.posts);
         console.log(state);
-        processWatcher.formState = i18nextInstance.t('formState.success');
       })
       .catch((err) => {
         console.log(err);

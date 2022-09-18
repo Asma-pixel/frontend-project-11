@@ -1,23 +1,25 @@
 import _ from 'lodash';
 
-export default (str) => {
+export default (str, i18nextInstance, currentId) => {
   const parser = new DOMParser();
-  const doc = parser.parseFromString(str, 'text/html');
+  const doc = parser.parseFromString(str, 'text/xml');
   const errorNode = doc.querySelector('parsererror');
-  if (errorNode) throw new Error('Ошибка парсинга');
-
+  const rss = doc.querySelector('rss');
+  if (errorNode) throw new Error(i18nextInstance.t('errors.parseError'));
+  if (rss === null) throw new Error(i18nextInstance.t('errors.linkNotRss'));
+  const regexPattern = /^<!\[CDATA\[+|]]>$/g;
   const feed = {
-    id: _.uniqueId(),
-    title: doc.querySelector('title').innerHTML,
-    description: doc.querySelector('description').innerHTML,
+    id: currentId,
+    title: doc.querySelector('title').innerHTML.replace(regexPattern, ''),
+    description: doc.querySelector('description').innerHTML.replace(regexPattern, ''),
   };
-  const currentId = feed.id;
   const items = Array.from(doc.querySelectorAll('item'));
-  const posts = items.map((item) => ({
+  const posts = items.map((item, index) => ({
     feedId: currentId,
-    title: item.querySelector('title').innerHTML,
-    description: item.querySelector('description').innerHTML,
-    link: item.querySelector('link').nextSibling.innerHTML,
+    id: index + 1,
+    title: item.querySelector('title').innerHTML.replace(regexPattern, ''),
+    description: item.querySelector('description').innerHTML.replace(regexPattern, ''),
+    link: item.querySelector('link').innerHTML,
   }));
   return { feed, posts };
 };

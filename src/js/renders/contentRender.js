@@ -19,8 +19,8 @@ export default (content, elements, i18nInstance) => {
   divFeed.innerHTML = '<h2 class="card-title h4">Фиды</h2>';
   card.append(divFeed);
   const ul = document.createElement('ul');
-  console.log(content.f);
-  content.feed.forEach((element) => {
+  console.log(content.feed);
+  content.feed.flat().forEach((element) => {
     const li = document.createElement('li');
     li.classList.add('list-group-item');
     const h3 = `<h3 class="h6 m-0">${element.title}</h3>`;
@@ -29,4 +29,15 @@ export default (content, elements, i18nInstance) => {
     ul.append(li);
   });
   card.append(ul);
+
+  localElements.posts.innerHTML = '';
+  const postContainer = document.createElement('ul');
+  const postFlat = content.post.flat();
+  postFlat.forEach((item) => {
+    const li = document.createElement('li');
+    const a = `<a href="${item.link}">${item.title}</a>`;
+    li.innerHTML = a;
+    postContainer.append(li);
+  });
+  localElements.posts.append(postContainer);
 };
