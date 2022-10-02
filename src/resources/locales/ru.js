@@ -15,6 +15,8 @@ export default {
       failed: 'failed',
       proccessing: 'proccessing',
       success: 'success',
+      postRender: 'postRender',
+      feedRender: 'feedRender',
     },
     // END
   },

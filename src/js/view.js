@@ -1,14 +1,17 @@
 import onChange from 'on-change';
-import errorRender from './renders/errorRender.js';
-import contentRender from './renders/contentRender.js';
+import postRender from './renders/postRender.js';
 import proccessRender from './renders/proccessRender.js';
+import statusRender from './renders/statusRender.js';
+import feedRender from './renders/feedRender.js';
 
 export default (state, elements, i18nInstance) => onChange(state, (path, value) => {
   switch (value) {
     case '': return;
-    case 'failed': errorRender(state.errors, elements); break;
-    case 'success': contentRender(state.content, elements, i18nInstance); break;
+    case 'failed': statusRender(state.errors, elements, i18nInstance, 'failed'); break;
+    case 'success': statusRender(state.content, elements, i18nInstance, 'success'); break;
     case 'proccessing': proccessRender(elements); break;
-    default: throw new Error('Нету такого процесса');
+    case 'feedRender': feedRender(state.content, elements, i18nInstance); break;
+    case 'postRender': postRender(state.content, elements, i18nInstance); break;
+    default: throw new Error(`Нету такого процесса - ${value}`);
   }
 });
