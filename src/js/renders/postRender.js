@@ -49,6 +49,7 @@ export default (content, elements) => {
     if (currentUiState.isClicked) {
       link.classList.add('fw-normal', 'link-secondary');
       link.classList.remove('fw-bold');
+      console.log('a')
     }
   });
 };
