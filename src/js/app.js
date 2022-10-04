@@ -1,6 +1,5 @@
 import '../styles/styles.scss';
-
-// Import all of Bootstrap's JS
+import 'bootstrap';
 
 import * as yup from 'yup';
 import i18n from 'i18next';
@@ -10,48 +9,49 @@ import watcher from './view.js';
 import resources from '../resources/locales/index.js';
 import domParser from './parsers/domParser.js';
 
-const isNewFeed = (currentFeed, stateFeed) => {
-  const flagArr = stateFeed.filter(item => item.id === currentFeed.id);
-  return flagArr.length === 0 ? true : false;
-}
-const genNewPosts = (currentPosts, statePosts) => {
-  return currentPosts
+const genNewPosts = (currentPosts, statePosts) => currentPosts
   .filter((item) => {
-      const boolFlag = statePosts.filter(el => el.title == item.title)
-      return boolFlag.length === 0 ? true : false;
-  })
-}
+    const boolFlag = statePosts.filter((el) => el.title === item.title);
+    return boolFlag.length === 0;
+  });
 const request = (url, state, i18nextInstance, processWatcher) => {
-  axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`)
+  const tempState = state;
+  const tempWatcher = processWatcher;
+  return axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`)
     .then((responce) => {
-      const data = domParser(responce.data.contents, i18nextInstance, state.content.currentFeedId);
-      const feedForPush = isNewFeed(data.feed, state.content.feed) ? data.feed : [];
-      state.content.feed.push(feedForPush);
+      const data = domParser(responce.data.contents, i18nextInstance);
       const newPosts = genNewPosts(data.posts, state.content.post);
-      console.log(newPosts)
-      state.content.post.push(newPosts);
-
-      state.content.feed  =  state.content.feed.flat();
-      state.content.post  =  state.content.post.flat();
-      processWatcher.formState = '';
-
-
-      processWatcher.formState = i18nextInstance.t('formState.postRender');
+      newPosts.forEach((post) => {
+        const tempPost = post;
+        tempPost.id = _.uniqueId();
+        const uiStateItem = {
+          id: tempPost.id,
+          isClicked: false,
+        };
+        tempState.content.uiState.push(uiStateItem);
+      });
+      tempState.content.post.push(newPosts);
+      tempState.content.post = state.content.post.flat();
+      tempWatcher.formState = '';
+      tempWatcher.formState = i18nextInstance.t('formState.postRender');
+      return data;
+    })
+    .then((data) => {
+      setTimeout(() => request(url, state, i18nextInstance, processWatcher), 5000);
+      return data;
     });
-  setTimeout(() => request(url, state, i18nextInstance, processWatcher), 5000);
 };
 const app = () => {
   const state = {
     defaultLng: 'ru',
     currentLink: {},
-
     formState: '',
     links: [],
     errors: [],
     content: {
-      currentFeedId: '',
       feed: [],
       post: [],
+      uiState: [],
     },
   };
   const elements = {
@@ -89,13 +89,14 @@ const app = () => {
       .catch((err) => { throw new Error(err.errors); })
       .then((data) => {
         processWatcher.formState = i18nextInstance.t('formState.proccessing');
-        state.content.currentFeedId = _.uniqueId();
-        request(data.website, state, i18nextInstance, processWatcher);
+        return request(data.website, state, i18nextInstance, processWatcher);
       })
-      .then(() => {
+      .then((data) => {
         state.links.push(state.currentLink.website);
         state.errors = [];
         processWatcher.formState = i18nextInstance.t('formState.success');
+        state.content.feed.push(data.feed);
+        state.content.feed = state.content.feed.flat();
         processWatcher.formState = i18nextInstance.t('formState.feedRender');
       })
       .catch((err) => {
