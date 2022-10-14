@@ -2,8 +2,14 @@ export default (content, elements) => {
   const localElements = elements;
 
   localElements.posts.innerHTML = '';
-  const postContainer = document.createElement('ul');
-  postContainer.classList.add('list-group', 'border-0', 'rounded-0');
+  const postContainer = document.createElement('div');
+  postContainer.classList.add('card', 'border-0');
+  const postTitle = document.createElement('div');
+  postTitle.classList.add('card-body');
+  postTitle.innerHTML = '<h2 class="card-title h4">Посты</h2>';
+  postContainer.append(postTitle);
+  const list = document.createElement('ul');
+  list.classList.add('list-group', 'border-0', 'rounded-0');
   const postFlat = content.post.flat();
 
   postFlat.forEach((item) => {
@@ -19,8 +25,9 @@ export default (content, elements) => {
     button.dataset.bsTarget = '#modal';
     button.textContent = 'Просмотр';
     li.append(button);
-    postContainer.append(li);
+    list.append(li);
   });
+  postContainer.append(list);
   localElements.posts.append(postContainer);
 
   const btns = document.querySelectorAll('.btn-watcher');
@@ -41,7 +48,7 @@ export default (content, elements) => {
       link.classList.remove('fw-bold');
     });
   });
-  const links = postContainer.querySelectorAll('a');
+  const links = list.querySelectorAll('a');
   console.log(content.uiState);
   links.forEach((link) => {
     const currentId = link.dataset.id;
