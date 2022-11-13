@@ -3,8 +3,7 @@ export default (str, i18nextInstance) => {
   const doc = parser.parseFromString(str, 'text/xml');
   const errorNode = doc.querySelector('parsererror');
   const rss = doc.querySelector('rss');
-  if (errorNode) throw new Error(i18nextInstance.t('errors.parseError'));
-  if (rss === null) throw new Error(i18nextInstance.t('errors.linkNotRss'));
+  if (errorNode) throw new Error(i18nextInstance.t('errors.linkNotRss'));
   const regexPattern = /^<!\[CDATA\[+|]]>$/g;
   const feed = {
     title: doc.querySelector('title').innerHTML.replace(regexPattern, ''),
