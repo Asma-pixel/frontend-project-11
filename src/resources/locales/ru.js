@@ -5,7 +5,7 @@ export default {
       linkExist: 'RSS уже существует',
       linkNotValid: 'Ссылка должна быть валидным URL',
       linkNotRss: 'Ресурс не содержит валидный RSS',
-      parseError: 'Ошибка парсинга',
+      parseError: 'Ошибка сети',
     },
     success: {
       linkAdded: 'Rss успешно загружен',

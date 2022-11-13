@@ -1,6 +1,6 @@
 export default (content, elements) => {
   const localElements = elements;
-  console.log(content);
+
   localElements.feeds.innerHTML = '';
   const card = document.createElement('div');
   card.classList.add('card');
@@ -20,7 +20,5 @@ export default (content, elements) => {
     li.innerHTML = `${h3}\n${p}`.trim();
     ul.append(li);
   });
-  card.append(ul);
-  console.log(ul);
   localElements.feeds.append(card);
 };

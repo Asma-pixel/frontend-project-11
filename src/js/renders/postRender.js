@@ -49,7 +49,7 @@ export default (content, elements) => {
     });
   });
   const links = list.querySelectorAll('a');
-  console.log(content.uiState);
+
   links.forEach((link) => {
     const currentId = link.dataset.id;
     const currentUiState = content.uiState.find((item) => item.id === currentId);
