@@ -10,9 +10,10 @@ export default (content, elements) => {
   postContainer.append(postTitle);
   const list = document.createElement('ul');
   list.classList.add('list-group', 'border-0', 'rounded-0');
-  const postFlat = content.post.flat();
+  const sortedPosts = content.post
+    .sort((a, b) => b.id - a.id).flat();
 
-  postFlat.forEach((item) => {
+  sortedPosts.forEach((item) => {
     const li = document.createElement('li');
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
     const a = `<a data-id=${item.id} href="${item.link}">${item.title}</a>`;

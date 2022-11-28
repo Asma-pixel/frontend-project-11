@@ -1,8 +1,8 @@
 import onChange from 'on-change';
-import postRender from './renders/postRender.js';
-import proccessRender from './renders/proccessRender.js';
-import statusRender from './renders/statusRender.js';
-import feedRender from './renders/feedRender.js';
+import postRender from './postRender.js';
+import proccessRender from './proccessRender.js';
+import statusRender from './statusRender.js';
+import feedRender from './feedRender.js';
 
 export default (state, elements, i18nInstance) => onChange(state, (path, value) => {
   switch (value) {

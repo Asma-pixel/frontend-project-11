@@ -7,7 +7,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import watcher from './view.js';
 import resources from '../resources/locales/index.js';
-import domParser from './parsers/domParser.js';
+import domParser from './domParser.js';
 
 const genNewPosts = (currentPosts, statePosts) => currentPosts
   .filter((item) => {
@@ -95,7 +95,7 @@ const app = () => {
         state.links.push(state.currentLink.website);
         state.errors = [];
         processWatcher.formState = i18nextInstance.t('formState.success');
-        state.content.feed.push(data.feed);
+        state.content.feed = [data.feed, ...state.content.feed];
         state.content.feed = state.content.feed.flat();
         processWatcher.formState = i18nextInstance.t('formState.feedRender');
       })
