@@ -3,10 +3,12 @@ export default {
     // BEGIN (write your solution here)
     errors: {
       linkExist: 'RSS already exist',
-      linkNotValid: 'Link not valid to URL',
+      linkNotValid: 'Not valid URL',
+      linkNotRss: 'Resource not contain valid Rss',
+      parseError: 'Network error',
     },
     success: {
-      linkAdded: 'Rss was successfully loaded',
+      linkAdded: 'Rss load succesfully',
     },
     // END
   },

@@ -10,14 +10,5 @@ export default {
     success: {
       linkAdded: 'Rss успешно загружен',
     },
-
-    formState: {
-      failed: 'failed',
-      proccessing: 'proccessing',
-      success: 'success',
-      postRender: 'postRender',
-      feedRender: 'feedRender',
-    },
-    // END
   },
 };

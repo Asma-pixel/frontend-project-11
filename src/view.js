@@ -11,7 +11,7 @@ export default (state, elements, i18nInstance) => onChange(state, (path, value) 
     case 'success': statusRender(state.content, elements, i18nInstance, 'success'); break;
     case 'proccessing': proccessRender(elements); break;
     case 'feedRender': feedRender(state.content, elements); break;
-    case 'postRender': postRender(state.content, elements); break;
+    case 'postRender': postRender(state, elements); break;
     default: throw new Error(`Нету такого процесса - ${value}`);
   }
 });

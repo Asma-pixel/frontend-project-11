@@ -1,4 +1,4 @@
-export default (content, elements) => {
+export default ({ content, uiState }, elements) => {
   const localElements = elements;
 
   localElements.posts.innerHTML = '';
@@ -42,7 +42,7 @@ export default (content, elements) => {
       modalTitle.innerHTML = currentPost.title;
       modalDescription.innerHTML = currentPost.description;
       modalBtn.href = currentPost.link;
-      const currentUiStateItem = content.uiState.find((item) => item.id === currentId);
+      const currentUiStateItem = uiState.find((item) => item.id === currentId);
       currentUiStateItem.isClicked = true;
       const link = btn.previousSibling;
       link.classList.add('fw-normal', 'link-secondary');
@@ -53,7 +53,7 @@ export default (content, elements) => {
 
   links.forEach((link) => {
     const currentId = link.dataset.id;
-    const currentUiState = content.uiState.find((item) => item.id === currentId);
+    const currentUiState = uiState.find((item) => item.id === currentId);
     if (currentUiState.isClicked) {
       link.classList.add('fw-normal', 'link-secondary');
       link.classList.remove('fw-bold');
