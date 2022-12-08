@@ -10,13 +10,10 @@ export default ({ content, uiState }, elements) => {
   postContainer.append(postTitle);
   const list = document.createElement('ul');
   list.classList.add('list-group', 'border-0', 'rounded-0');
-  const sortedPosts = content.post
-    .sort((a, b) => b.id - a.id).flat();
-
-  sortedPosts.forEach((item) => {
+  content.post.forEach((item) => {
     const li = document.createElement('li');
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
-    const a = `<a data-id=${item.id} href="${item.link}">${item.title}</a>`;
+    const a = `<a data-id=${item.id} href="${item.url}">${item.title}</a>`;
     li.innerHTML = a;
     const button = document.createElement('button');
     button.type = 'button';
@@ -41,7 +38,7 @@ export default ({ content, uiState }, elements) => {
       const currentPost = content.post.find((item) => item.id === currentId);
       modalTitle.innerHTML = currentPost.title;
       modalDescription.innerHTML = currentPost.description;
-      modalBtn.href = currentPost.link;
+      modalBtn.href = currentPost.url;
       const currentUiStateItem = uiState.find((item) => item.id === currentId);
       currentUiStateItem.isClicked = true;
       const link = btn.previousSibling;

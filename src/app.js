@@ -11,38 +11,59 @@ const genNewPosts = (currentPosts, statePosts) => currentPosts
     const boolFlag = statePosts.filter((el) => el.title === item.title);
     return boolFlag.length === 0;
   });
-const request = (url, state, i18nextInstance, processWatcher) => {
-  const tempState = state;
-  const tempWatcher = processWatcher;
-  return axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`)
+
+const genRequestUri = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
+const requestForAdd = (url, watchedState) => {
+  const { content, uiState } = watchedState;
+  return axios.get(genRequestUri(url))
     .then((responce) => {
-      const data = domParser(responce.data.contents, i18nextInstance, url);
-      const newPosts = genNewPosts(data.posts, state.content.post);
-      newPosts.forEach((post) => {
-        const tempPost = post;
-        tempPost.id = _.uniqueId();
-        const uiStateItem = {
-          id: tempPost.id,
+      const { feed, posts } = domParser(responce.data.contents);
+      feed.url = url;
+      posts.forEach((post) => {
+        post.id = _.uniqueId();
+        const UiStateItem = {
+          id: post.id,
           isClicked: false,
         };
-        tempState.uiState.push(uiStateItem);
+        uiState.push(UiStateItem);
       });
-      tempState.content.post.push(newPosts);
-      tempState.content.post = state.content.post.flat();
-      tempWatcher.formState = '';
-      tempWatcher.formState = 'postRender';
-      return data;
-    })
-    .then((data) => {
-      setTimeout(() => request(url, state, i18nextInstance, processWatcher), 5000);
-      return data;
+      content.post = [posts, ...content.post].flat();
+      content.feed = [feed, content.feed].flat();
+      watchedState.formState = 'postRender';
+      watchedState.formState = 'feedRender';
+      watchedState.formState = 'initial';
     });
 };
+const requestForUpdate = (watchedState) => {
+  const { uiState, content } = watchedState;
+  content.feed.forEach((feed) => {
+    axios.get(genRequestUri(feed.url))
+      .then((responce) => {
+        const data = domParser(responce.data.contents);
+        const newPosts = genNewPosts(data.posts, content.post);
+        if (newPosts.length === 0) return;
+        newPosts.forEach((post) => {
+          post.id = _.uniqueId();
+          const uiStateItem = {
+            id: post.id,
+            isClicked: false,
+          };
+          uiState.push(uiStateItem);
+        });
+        content.post = [newPosts, ...content.post].flat();
+
+        watchedState.formState = 'postRender';
+        watchedState.formState = 'initial';
+      })
+      .then(() => {
+        setTimeout(() => requestForUpdate(watchedState), 5000);
+      });
+  });
+};
 const app = () => {
-  const state = {
+  const initialState = {
     defaultLng: 'ru',
-    currentLink: {},
-    formState: '',
+    formState: 'initial',
     errors: [],
     content: {
       feed: [],
@@ -54,46 +75,42 @@ const app = () => {
     form: document.querySelector('form'),
     input: document.querySelector('input'),
     feedback: document.querySelector('.feedback'),
-    button: document.querySelector('button'),
+    button: document.querySelector('.addBtn'),
     feeds: document.querySelector('.feeds'),
     posts: document.querySelector('.posts'),
   };
   const i18nextInstance = i18n.createInstance();
   i18nextInstance.init({
-    lng: state.defaultLng,
+    lng: initialState.defaultLng,
     debug: false,
     resources,
   })
     .then(() => {
-      const processWatcher = watcher(state, elements, i18nextInstance);
+      const watchedState = watcher(initialState, elements, i18nextInstance);
       elements.form.addEventListener('submit', (e) => {
         e.preventDefault();
-        const formData = new FormData(elements.form);
-        const link = { website: formData.get('url') };
-        const links = state.content.feed.map((el) => el.link);
-        const linkShema = yup.object({
-          website: yup.string().url('linkNotValid').notOneOf(links, 'linkExist').required(),
-        });
-
-        linkShema.validate(link)
+        const formData = new FormData(e.target);
+        const url = formData.get('url');
+        const urls = watchedState.content.feed.map((el) => el.url);
+        const linkShema = yup.string().url('linkNotValid').notOneOf(urls, 'linkExist').required();
+        linkShema.validate(url)
           .catch((err) => { throw new Error(err.errors); })
-          .then((data) => {
-            processWatcher.formState = 'proccessing';
-            return request(data.website, state, i18nextInstance, processWatcher);
+          .then(() => {
+            watchedState.formState = 'proccessing';
+            elements.button.disabled = true;
+            return requestForAdd(url, watchedState);
           })
-          .then((data) => {
-            state.errors = [];
-            processWatcher.formState = 'success';
-            state.content.feed = [data.feed, ...state.content.feed];
-            state.content.feed = state.content.feed.flat();
-            processWatcher.formState = 'feedRender';
+          .then(() => {
+            watchedState.formState = 'success';
+            elements.button.disabled = false;
           })
           .catch((err) => {
-            state.errors = err.message;
-            processWatcher.formState = 'failed';
+            watchedState.errors = err.message;
+            watchedState.formState = 'failed';
           })
           .finally(() => {
-            processWatcher.formState = '';
+            watchedState.formState = 'initial';
+            requestForUpdate(watchedState);
           });
       });
     });
