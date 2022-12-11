@@ -1,4 +1,5 @@
-export default (content, elements) => {
+export default ({ content }, elements) => {
+  const { feeds } = content;
   const localElements = elements;
   const card = document.createElement('div');
   const divFeed = document.createElement('div');
@@ -12,7 +13,7 @@ export default (content, elements) => {
 
   const ul = document.createElement('ul');
   ul.classList.add('list-group', 'border-0', 'rounded-0');
-  content.feed.forEach((element) => {
+  feeds.forEach((element) => {
     const li = document.createElement('li');
     li.classList.add('list-group-item', 'border-0', 'border-end-0');
     const h3 = `<h3 class="h6 m-0">${element.title}</h3>`;

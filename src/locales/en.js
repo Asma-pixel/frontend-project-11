@@ -5,7 +5,7 @@ export default {
       linkExist: 'RSS already exist',
       linkNotValid: 'Not valid URL',
       linkNotRss: 'Resource not contain valid Rss',
-      parseError: 'Network error',
+      networkError: 'Network error',
     },
     success: {
       linkAdded: 'Rss load succesfully',

@@ -10,7 +10,7 @@ export default ({ content, uiState }, elements) => {
   postContainer.append(postTitle);
   const list = document.createElement('ul');
   list.classList.add('list-group', 'border-0', 'rounded-0');
-  content.post.forEach((item) => {
+  content.posts.forEach((item) => {
     const li = document.createElement('li');
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
     const a = `<a data-id=${item.id} href="${item.url}">${item.title}</a>`;
@@ -35,7 +35,7 @@ export default ({ content, uiState }, elements) => {
   btns.forEach((btn) => {
     btn.addEventListener('click', (e) => {
       const currentId = e.target.dataset.id;
-      const currentPost = content.post.find((item) => item.id === currentId);
+      const currentPost = content.posts.find((item) => item.id === currentId);
       modalTitle.innerHTML = currentPost.title;
       modalDescription.innerHTML = currentPost.description;
       modalBtn.href = currentPost.url;

@@ -13,9 +13,10 @@ const genNewPosts = (currentPosts, statePosts) => currentPosts
   });
 
 const genRequestUri = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
-const requestForAdd = (url, watchedState) => {
+const loadRss = (url, watchedState) => {
   const { content, uiState } = watchedState;
   return axios.get(genRequestUri(url))
+    .catch(() => { throw new Error('networkError'); })
     .then((responce) => {
       const { feed, posts } = domParser(responce.data.contents);
       feed.url = url;
@@ -27,20 +28,18 @@ const requestForAdd = (url, watchedState) => {
         };
         uiState.push(UiStateItem);
       });
-      content.post = [posts, ...content.post].flat();
-      content.feed = [feed, content.feed].flat();
-      watchedState.formState = 'postRender';
-      watchedState.formState = 'feedRender';
+      content.posts = [posts, ...content.posts].flat();
+      content.feeds = [feed, ...content.feeds].flat();
       watchedState.formState = 'initial';
     });
 };
-const requestForUpdate = (watchedState) => {
+const updateRss = (watchedState) => {
   const { uiState, content } = watchedState;
-  content.feed.forEach((feed) => {
+  content.feeds.forEach((feed) => {
     axios.get(genRequestUri(feed.url))
       .then((responce) => {
         const data = domParser(responce.data.contents);
-        const newPosts = genNewPosts(data.posts, content.post);
+        const newPosts = genNewPosts(data.posts, content.posts);
         if (newPosts.length === 0) return;
         newPosts.forEach((post) => {
           post.id = _.uniqueId();
@@ -50,15 +49,11 @@ const requestForUpdate = (watchedState) => {
           };
           uiState.push(uiStateItem);
         });
-        content.post = [newPosts, ...content.post].flat();
-
-        watchedState.formState = 'postRender';
+        content.posts = [newPosts, ...content.posts].flat();
         watchedState.formState = 'initial';
-      })
-      .then(() => {
-        setTimeout(() => requestForUpdate(watchedState), 5000);
       });
   });
+  setTimeout(() => updateRss(watchedState), 5000);
 };
 const app = () => {
   const initialState = {
@@ -66,8 +61,8 @@ const app = () => {
     formState: 'initial',
     errors: [],
     content: {
-      feed: [],
-      post: [],
+      feeds: [],
+      posts: [],
     },
     uiState: [],
   };
@@ -87,18 +82,20 @@ const app = () => {
   })
     .then(() => {
       const watchedState = watcher(initialState, elements, i18nextInstance);
+      updateRss(watchedState);
       elements.form.addEventListener('submit', (e) => {
         e.preventDefault();
+
         const formData = new FormData(e.target);
         const url = formData.get('url');
-        const urls = watchedState.content.feed.map((el) => el.url);
+        const urls = watchedState.content.feeds.map((el) => el.url);
         const linkShema = yup.string().url('linkNotValid').notOneOf(urls, 'linkExist').required();
         linkShema.validate(url)
           .catch((err) => { throw new Error(err.errors); })
           .then(() => {
             watchedState.formState = 'proccessing';
             elements.button.disabled = true;
-            return requestForAdd(url, watchedState);
+            return loadRss(url, watchedState);
           })
           .then(() => {
             watchedState.formState = 'success';
@@ -110,7 +107,6 @@ const app = () => {
           })
           .finally(() => {
             watchedState.formState = 'initial';
-            requestForUpdate(watchedState);
           });
       });
     });

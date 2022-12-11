@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Rss aggregator",
   "main": "src/index.js",
+  "simple-git-hooks": {
+    "pre-push": "make lint"
+  },
   "scripts": {},
   "repository": {
     "type": "git",
@@ -35,7 +38,7 @@
     "postcss-loader": "^7.0.1",
     "postcss-preset-env": "^7.8.0",
     "prettier": "^2.7.1",
-    "simple-git-hooks": "^2.8.0",
+    "simple-git-hooks": "^2.8.1",
     "style-loader": "^3.3.1",
     "url-loader": "^4.1.1",
     "vercel": "^19.1.2",
