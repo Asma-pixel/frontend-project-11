@@ -14,7 +14,7 @@ test.describe('navigation', () => {
     // create a locator
     const button = page.locator('text=Добавить');
     await expect(button).toHaveAttribute('type', 'submit');
-    const input = page.getByRole('textbox');
+    const input = page.locator('#url-input');
     await input.fill('https://ru.hexlet.io/lessons.rss');
 
     await button.click();
@@ -37,7 +37,7 @@ test.describe('navigation', () => {
     // create a locator
     const button = page.locator('text=Добавить');
     await expect(button).toHaveAttribute('type', 'submit');
-    const input = page.getByRole('textbox');
+    const input = page.locator('#url-input');
     await input.fill('14324');
 
     await button.click();
