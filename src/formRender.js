@@ -3,6 +3,8 @@ const processRender = (elements) => {
   elements.button.disabled = true;
 };
 const successRender = (elements, i18nInstance) => {
+  elements.input.disabled = false;
+  elements.button.disabled = false;
   elements.input.classList.remove('is-invalid');
   elements.input.value = '';
   elements.input.focus();
