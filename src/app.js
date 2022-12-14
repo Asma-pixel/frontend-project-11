@@ -11,19 +11,6 @@ const genNewPosts = (currentPosts, statePosts) => currentPosts
     const boolFlag = statePosts.filter((el) => el.title === item.title);
     return boolFlag.length === 0;
   });
-const addListeners = (state, elements) => {
-  elements.forEach((el) => {
-    el.addEventListener('click', (e) => {
-      const currentId = e.target.dataset.id;
-      state.uiState.forEach((item) => { item.isOpen = false; });
-      const uiStateItem = {
-        id: currentId,
-        isOpen: true,
-      };
-      state.uiState.push(uiStateItem);
-    });
-  });
-};
 const genRequestUri = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
 
 const loadRss = (url, watchedState) => {
@@ -38,42 +25,47 @@ const loadRss = (url, watchedState) => {
       });
       content.posts = [posts, ...content.posts].flat();
       content.feeds = [feed, ...content.feeds].flat();
-      const elements = document.querySelectorAll('.btn-watcher');
-      addListeners(watchedState, elements);
-      watchedState.formState = 'initial';
+
+      watchedState.formState = 'filling';
     });
 };
 
 const updateRss = (watchedState) => {
   const { content } = watchedState;
-  content.feeds.forEach((feed) => {
-    axios.get(genRequestUri(feed.url))
-      .then((responce) => {
-        const data = domParser(responce.data.contents);
-        const posts = genNewPosts(data.posts, content.posts);
-        if (posts.length === 0) return;
-        posts.forEach((post) => {
-          post.id = _.uniqueId();
+  const promise = Promise.resolve();
+  promise.then(() => {
+    content.feeds.forEach((feed) => {
+      axios.get(genRequestUri(feed.url))
+        .then((responce) => {
+          const data = domParser(responce.data.contents);
+          const posts = genNewPosts(data.posts, content.posts);
+          if (posts.length === 0) return;
+          posts.forEach((post) => {
+            post.id = _.uniqueId();
+          });
+          content.posts = [posts, ...content.posts].flat();
+          watchedState.formState = 'filling';
         });
-        content.posts = [posts, ...content.posts].flat();
-        const elements = document.querySelectorAll('.btn-watcher');
-        addListeners(watchedState, elements);
-        watchedState.formState = 'initial';
-      });
-  });
-  setTimeout(() => updateRss(watchedState), 5000);
+    });
+  })
+    .then(() => {
+      setTimeout(() => updateRss(watchedState), 5000);
+    });
 };
 
 const app = () => {
   const initialState = {
     defaultLng: 'ru',
-    formState: 'initial',
-    errors: [],
+    formState: 'filling',
+    errors: null,
     content: {
       feeds: [],
       posts: [],
     },
-    uiState: [],
+    uiState: {
+      seenPosts: [],
+      modalPostId: null,
+    },
   };
   const elements = {
     form: document.querySelector('form'),
@@ -112,8 +104,15 @@ const app = () => {
             watchedState.errors = err.message;
           })
           .finally(() => {
-            watchedState.formState = 'initial';
+            watchedState.formState = 'filling';
           });
+      });
+
+      elements.posts.addEventListener('click', (e) => {
+        const currentId = e.target.dataset.id;
+        if (!currentId) return;
+        watchedState.uiState.modalPostId = currentId;
+        watchedState.uiState.seenPosts = [currentId, ...watchedState.uiState.seenPosts];
       });
     });
 };
