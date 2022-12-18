@@ -25,39 +25,36 @@ const loadRss = (url, watchedState) => {
       });
       content.posts = [posts, ...content.posts].flat();
       content.feeds = [feed, ...content.feeds].flat();
-
-      watchedState.formState = 'filling';
     });
 };
-
 const updateRss = (watchedState) => {
   const { content } = watchedState;
-  const promise = Promise.resolve();
-  promise.then(() => {
-    content.feeds.forEach((feed) => {
-      axios.get(genRequestUri(feed.url))
-        .then((responce) => {
-          const data = domParser(responce.data.contents);
-          const posts = genNewPosts(data.posts, content.posts);
-          if (posts.length === 0) return;
-          posts.forEach((post) => {
-            post.id = _.uniqueId();
-          });
-          content.posts = [posts, ...content.posts].flat();
-          watchedState.formState = 'filling';
-        });
-    });
-  })
-    .then(() => {
-      setTimeout(() => updateRss(watchedState), 5000);
-    });
+  const requests = content.feeds.map((feed) => axios.get(genRequestUri(feed.url))
+    .then((responce) => {
+      const data = domParser(responce.data.contents);
+      const posts = genNewPosts(data.posts, content.posts);
+      if (posts.length === 0) return;
+      posts.forEach((post) => {
+        post.id = _.uniqueId();
+      });
+      content.posts = [posts, ...content.posts].flat();
+    }));
+  Promise.all(requests).then(() => {
+    setTimeout(() => updateRss(watchedState), 5000);
+  });
 };
 
 const app = () => {
   const initialState = {
     defaultLng: 'ru',
-    formState: 'filling',
-    errors: null,
+    form: {
+      error: null,
+      state: 'filling',
+    },
+    contentLoad: {
+      error: null,
+      state: 'idle',
+    },
     content: {
       feeds: [],
       posts: [],
@@ -92,19 +89,24 @@ const app = () => {
         const urls = watchedState.content.feeds.map((el) => el.url);
         const linkShema = yup.string().url('linkNotValid').notOneOf(urls, 'linkExist').required();
         linkShema.validate(url)
-          .catch((err) => { throw new Error(err.errors); })
           .then(() => {
-            watchedState.formState = 'proccessing';
+            watchedState.form.state = 'proccessing';
             return loadRss(url, watchedState);
           })
           .then(() => {
-            watchedState.formState = 'success';
+            watchedState.contentLoad.state = 'success';
           })
           .catch((err) => {
-            watchedState.errors = err.message;
+            if (err instanceof yup.ValidationError) {
+              watchedState.form.error = err.message;
+              watchedState.form.state = 'failedOnValidation';
+              return;
+            }
+            watchedState.contentLoad.error = err.message;
+            watchedState.contentLoad.state = 'failedOnLoad';
           })
           .finally(() => {
-            watchedState.formState = 'filling';
+            watchedState.form.state = 'filling';
           });
       });
 

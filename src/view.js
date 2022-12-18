@@ -4,10 +4,11 @@ const processRender = (elements) => {
   elements.input.disabled = true;
   elements.button.disabled = true;
 };
-
-const successRender = (elements, i18nInstance) => {
+const fillingRender = (elements) => {
   elements.input.disabled = false;
   elements.button.disabled = false;
+};
+const successRender = (elements, i18nInstance) => {
   elements.input.classList.remove('is-invalid');
   elements.input.value = '';
   elements.input.focus();
@@ -17,20 +18,26 @@ const successRender = (elements, i18nInstance) => {
 };
 
 const errorsRender = (error, elements, i18nInstance) => {
-  elements.input.disabled = false;
-  elements.button.disabled = false;
   elements.input.classList.add('is-invalid');
-  elements.feedback.innerHTML = i18nInstance.t(`errors.${error}`);
+  elements.feedback.textContent = i18nInstance.t(`errors.${error}`);
   elements.feedback.classList.remove('text-success');
   elements.feedback.classList.add('text-danger');
 };
 
-const formRender = (state, elements, i18nInstance) => {
-  switch (state.formState) {
-    case 'filling': return;
-    case 'success': successRender(elements, i18nInstance); break;
+const formRender = ({ form }, elements, i18nInstance) => {
+  switch (form.state) {
+    case 'filling': fillingRender(elements); break;
     case 'proccessing': processRender(elements); break;
-    default: throw new Error(`Нету такого процесса - ${state.formState}`);
+    case 'failedOnValidation': errorsRender(form.error, elements, i18nInstance); break;
+    default: throw new Error(`Нету такого процесса - ${form.state}`);
+  }
+};
+const statusRender = ({ contentLoad }, elements, i18nInstance) => {
+  switch (contentLoad.state) {
+    case 'idle': break;
+    case 'success': successRender(elements, i18nInstance); break;
+    case 'failedOnLoad': errorsRender(contentLoad.error, elements, i18nInstance); break;
+    default: throw new Error(`Нету такого процесса - ${contentLoad.state}`);
   }
 };
 
@@ -65,33 +72,6 @@ const feedRender = ({ content }, elements) => {
   localElements.feeds.append(card);
 };
 
-// Можно оставить если не нужно ререндерить блок постов при нажатии на кнопку "Просмотр"
-// const uiStateRender = ({ content, uiState }) => {
-//   const list = document.querySelector('.list-group');
-//   const modalTitle = document.querySelector('.modal-title');
-//   const modalDescription = document.querySelector('.modal-body');
-//   const modalBtn = document.querySelector('.full-article');
-
-//   const postId = uiState.modalPostId;
-//   if (postId !== null) {
-//     const currentPost = content.posts.find((item) => item.id === postId);
-//     modalTitle.textContent = currentPost.title;
-//     modalDescription.textContent = currentPost.description;
-//     modalBtn.href = currentPost.url;
-//   }
-//   const links = list.querySelectorAll('a');
-//   console.log(uiState)
-//   links.forEach((link) => {
-//     const currentId = link.dataset.id;
-
-//     const currentUiState = uiState.seenPosts.find((item) => item === currentId);
-//     if (currentUiState) {
-//       link.classList.add('fw-normal', 'link-secondary');
-//       link.classList.remove('fw-bold');
-//     }
-//   });
-// };
-
 const postRender = ({ content, uiState }, elements) => {
   const localElements = elements;
   localElements.posts.innerHTML = '';
@@ -106,8 +86,12 @@ const postRender = ({ content, uiState }, elements) => {
   content.posts.forEach((item) => {
     const li = document.createElement('li');
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
-    const a = `<a data-id=${item.id} class="fw-bold"href="${item.url}">${item.title}</a>`;
-    li.innerHTML = a;
+    const a = document.createElement('a');
+    a.dataset.id = item.id;
+    a.href = item.url;
+    a.textContent = item.title;
+    a.classList.add('fw-bold');
+    li.append(a);
     const button = document.createElement('button');
     button.type = 'button';
     button.classList.add('btn', 'btn-outline-primary', 'btn-sm', 'btn-watcher');
@@ -145,8 +129,9 @@ const postRender = ({ content, uiState }, elements) => {
 export default (state, elements, i18nInstance) => onChange(state, (path) => {
   switch (path) {
     case 'uiState.seenPosts': postRender(state, elements); break;
-    case 'errors': errorsRender(state.errors, elements, i18nInstance); break;
-    case 'formState': formRender(state, elements, i18nInstance); break;
+
+    case 'form.state': formRender(state, elements, i18nInstance); break;
+    case 'contentLoad.state': statusRender(state, elements, i18nInstance); break;
     case 'content.posts': postRender(state, elements); break;
     case 'content.feeds': feedRender(state, elements); break;
     default: break;
