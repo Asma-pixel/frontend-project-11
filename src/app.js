@@ -64,7 +64,7 @@ const app = () => {
     defaultLng: 'ru',
     form: {
       error: null,
-      state: 'filling',
+      valid: true,
     },
     contentLoad: {
       error: null,
@@ -106,10 +106,11 @@ const app = () => {
         linkShema.validate(url)
           .then(() => {
             loadRss(url, watchedState);
+            watchedState.form.valid = true;
           })
           .catch((err) => {
             watchedState.form.error = err.message;
-            watchedState.form.state = 'failedOnValidation';
+            watchedState.form.valid = false;
           })
           .finally(() => {
             watchedState.form.state = 'filling';

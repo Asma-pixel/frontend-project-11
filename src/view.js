@@ -1,14 +1,28 @@
 import onChange from 'on-change';
 
+
+
+const formRender = ({ form }, elements, i18nInstance) => {
+  elements.input.disabled = false;
+  elements.button.disabled = false;
+  if(form.valid) {
+    elements.input.classList.remove('is-invalid');
+    return;
+  }
+  elements.input.classList.add('is-invalid');
+  elements.feedback.classList.add('text-danger');
+  elements.feedback.classList.remove('text-success');
+  elements.feedback.textContent = i18nInstance.t(`errors.${form.error}`);
+};
+
 const processRender = (elements) => {
   elements.input.disabled = true;
   elements.button.disabled = true;
 };
-const fillingRender = (elements) => {
+
+const successRender = (elements, i18nInstance) => {
   elements.input.disabled = false;
   elements.button.disabled = false;
-};
-const successRender = (elements, i18nInstance) => {
   elements.input.classList.remove('is-invalid');
   elements.input.value = '';
   elements.input.focus();
@@ -18,20 +32,14 @@ const successRender = (elements, i18nInstance) => {
 };
 
 const errorsRender = (error, elements, i18nInstance) => {
+  elements.input.disabled = false;
+  elements.button.disabled = false;
   elements.input.classList.add('is-invalid');
   elements.feedback.textContent = i18nInstance.t(`errors.${error}`);
   elements.feedback.classList.remove('text-success');
   elements.feedback.classList.add('text-danger');
 };
 
-const formRender = ({ form }, elements, i18nInstance) => {
-  switch (form.state) {
-    case 'filling': fillingRender(elements); break;
-    case 'proccessing': processRender(elements); break;
-    case 'failedOnValidation': errorsRender(form.error, elements, i18nInstance); break;
-    default: break;
-  }
-};
 const statusRender = ({ contentLoad }, elements, i18nInstance) => {
   switch (contentLoad.state) {
     case 'idle': break;
@@ -130,7 +138,7 @@ const postRender = ({ content, uiState }, elements, i18nInstance) => {
 export default (state, elements, i18nInstance) => onChange(state, (path) => {
   switch (path) {
     case 'uiState.seenPosts': postRender(state, elements, i18nInstance); break;
-    case 'form.state': formRender(state, elements, i18nInstance); break;
+    case 'form.valid': formRender(state, elements, i18nInstance); break;
     case 'contentLoad.state': statusRender(state, elements, i18nInstance); break;
     case 'content.posts': postRender(state, elements, i18nInstance); break;
     case 'content.feeds': feedRender(state, elements, i18nInstance); break;
