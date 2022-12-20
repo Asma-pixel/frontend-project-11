@@ -102,7 +102,6 @@ const app = () => {
         const url = formData.get('url');
         const urls = watchedState.content.feeds.map((el) => el.url);
         const linkShema = yup.string().url('linkNotValid').notOneOf(urls, 'linkExist').required();
-        watchedState.form.state = 'proccessing';
         linkShema.validate(url)
           .then(() => {
             loadRss(url, watchedState);
@@ -111,16 +110,16 @@ const app = () => {
           .catch((err) => {
             watchedState.form.error = err.message;
             watchedState.form.valid = false;
-          })
-          .finally(() => {
-            watchedState.form.state = 'filling';
           });
       });
       elements.posts.addEventListener('click', (e) => {
         const currentId = e.target.dataset.id;
         if (!currentId) return;
         watchedState.uiState.modalPostId = currentId;
-        watchedState.uiState.seenPosts = _.uniq([currentId, ...watchedState.uiState.seenPosts]);
+        const isNewId = !watchedState.uiState.seenPosts.some((el) => el === currentId);
+        if (isNewId) {
+          watchedState.uiState.seenPosts = [currentId, ...watchedState.uiState.seenPosts];
+        }
       });
     });
 };
