@@ -29,7 +29,7 @@ const formRender = ({ form }, elements, i18nInstance) => {
     case 'filling': fillingRender(elements); break;
     case 'proccessing': processRender(elements); break;
     case 'failedOnValidation': errorsRender(form.error, elements, i18nInstance); break;
-    default: throw new Error(`Нету такого процесса - ${form.state}`);
+    default: break;
   }
 };
 const statusRender = ({ contentLoad }, elements, i18nInstance) => {
@@ -37,11 +37,12 @@ const statusRender = ({ contentLoad }, elements, i18nInstance) => {
     case 'idle': break;
     case 'success': successRender(elements, i18nInstance); break;
     case 'failedOnLoad': errorsRender(contentLoad.error, elements, i18nInstance); break;
-    default: throw new Error(`Нету такого процесса - ${contentLoad.state}`);
+    case 'contentLoad': processRender(elements); break;
+    default: break;
   }
 };
 
-const feedRender = ({ content }, elements) => {
+const feedRender = ({ content }, elements, i18nInstance) => {
   const { feeds } = content;
   const localElements = elements;
   const card = document.createElement('div');
@@ -50,7 +51,7 @@ const feedRender = ({ content }, elements) => {
   card.classList.add('card');
   card.classList.add('border-0');
   divFeed.classList.add('card-body');
-  divFeed.innerHTML = '<h2 class="card-title h4">Фиды</h2>';
+  divFeed.innerHTML = `<h2 class="card-title h4">${i18nInstance.t('feedTitle')}</h2>`;
   card.append(divFeed);
   const ul = document.createElement('ul');
   ul.classList.add('list-group', 'border-0', 'rounded-0');
@@ -72,14 +73,14 @@ const feedRender = ({ content }, elements) => {
   localElements.feeds.append(card);
 };
 
-const postRender = ({ content, uiState }, elements) => {
+const postRender = ({ content, uiState }, elements, i18nInstance) => {
   const localElements = elements;
   localElements.posts.innerHTML = '';
   const postContainer = document.createElement('div');
   postContainer.classList.add('card', 'border-0');
   const postTitle = document.createElement('div');
   postTitle.classList.add('card-body');
-  postTitle.innerHTML = '<h2 class="card-title h4">Посты</h2>';
+  postTitle.innerHTML = `<h2 class="card-title h4">${i18nInstance.t('postTitle')}</h2>`;
   postContainer.append(postTitle);
   const list = document.createElement('ul');
   list.classList.add('list-group', 'border-0', 'rounded-0');
@@ -128,12 +129,11 @@ const postRender = ({ content, uiState }, elements) => {
 
 export default (state, elements, i18nInstance) => onChange(state, (path) => {
   switch (path) {
-    case 'uiState.seenPosts': postRender(state, elements); break;
-
+    case 'uiState.seenPosts': postRender(state, elements, i18nInstance); break;
     case 'form.state': formRender(state, elements, i18nInstance); break;
     case 'contentLoad.state': statusRender(state, elements, i18nInstance); break;
-    case 'content.posts': postRender(state, elements); break;
-    case 'content.feeds': feedRender(state, elements); break;
+    case 'content.posts': postRender(state, elements, i18nInstance); break;
+    case 'content.feeds': feedRender(state, elements, i18nInstance); break;
     default: break;
   }
 });

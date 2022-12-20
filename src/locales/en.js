@@ -1,5 +1,7 @@
 export default {
   translation: {
+    postTitle: 'Posts',
+    feedTitle: 'Feeds',
     // BEGIN (write your solution here)
     errors: {
       linkExist: 'RSS already exist',
