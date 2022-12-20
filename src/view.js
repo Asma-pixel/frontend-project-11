@@ -1,11 +1,9 @@
 import onChange from 'on-change';
 
-
-
 const formRender = ({ form }, elements, i18nInstance) => {
   elements.input.disabled = false;
   elements.button.disabled = false;
-  if(form.valid) {
+  if (form.valid) {
     elements.input.classList.remove('is-invalid');
     return;
   }
